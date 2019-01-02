@@ -9,7 +9,6 @@
     return fetch(requestUrl)
       .then(res => res.json())
       .then(res => {
-        console.dir(res.results);
         return res.results;
       })
       .catch(e => {
