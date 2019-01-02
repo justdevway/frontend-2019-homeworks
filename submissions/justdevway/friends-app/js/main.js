@@ -18,14 +18,21 @@
   };
 
   const findDate = str => {
-    const workArr = str.slice(0, 10).split("-");
-    const [years, month, days] = [...workArr];
+    const workArr = str.split("T");
+    const firstDatePart = workArr[0].split('-');
+    const secondDatePart = workArr[1].slice(0, -1).split(':');
+
+    const [years, month, days] = [...firstDatePart];
+    const [hours, minutes, seconds]  = [...secondDatePart];
 
     const result = {
-      days,
-      month,
       years,
-      str: workArr.reverse().join("-")
+      month,
+      days,
+      hours,
+      minutes,
+      seconds,
+      str: firstDatePart.reverse().join("-")
     };
 
     return result;
@@ -191,8 +198,8 @@
     const sortByDate = (a, b) => {
         const dateObjA = findDate(a.registered.date);
         const dateObjB = findDate(b.registered.date);
-        const dateA = new Date(dateObjA.years, dateObjA.month, dateObjA.days);
-        const dateB = new Date(dateObjB.years, dateObjB.month, dateObjB.days);
+        const dateA = new Date(dateObjA.years, dateObjA.month - 1, dateObjA.days, dateObjA.hours, dateObjA.minutes, dateObjA.seconds).getTime();
+        const dateB = new Date(dateObjB.years, dateObjB.month - 1, dateObjB.days, dateObjB.hours, dateObjB.minutes, dateObjB.seconds).getTime();
         if (index == 2) {
             return asc(dateA, dateB);
         } else {
@@ -257,7 +264,8 @@
     makePagination(".js-cards__item", ".js-pagination__main_content");
   };
 
-  const liveSearch = (text, parameter) => {
+  const liveSearch = (text, parameter, {target}) => {
+    removeActiveFilters(target);
     const workElements = document.querySelectorAll(".js-cards__item");
     const str = `^${text}`;
     const reg = new RegExp(str);
@@ -278,13 +286,25 @@
     makePagination(".js-cards__item", ".js-pagination__main_content");
   };
 
-  const selectFilter = element => {
-    const sameElements = element.parentElement.querySelectorAll(
-      ".js-controller__label"
+  const removeActiveFilters = (element) => {
+    const controllersParent = document.querySelector('.js-controllers');
+    const filters = controllersParent.querySelectorAll(
+        ".js-controller__label"
     );
-    sameElements.forEach(el => {
+    const inputs = controllersParent.querySelectorAll('.controller__search');
+
+    filters.forEach(el => {
       el.classList.remove("is_active");
     });
+    inputs.forEach(el => {
+      if(el !== element) {
+        el.value = '';
+      }
+    })
+  };
+
+  const selectFilter = element => {
+    removeActiveFilters();
     element.classList.add("is_active");
   };
 
@@ -351,10 +371,7 @@
     console.log(oldCards);
     makeCards(oldCards, ITEMS_QUANTITY);
     tempCards = oldCards.slice();
-    const filters = document.querySelectorAll(".js-controller__label");
-    filters.forEach(el => {
-      el.classList.remove("is_active");
-    });
+    removeActiveFilters();
   };
 
   const startGame = () => {
@@ -399,17 +416,17 @@
 
   nameSearchInput.addEventListener("keyup", event => {
     let text = event.target.value;
-    liveSearch(text, "data-name");
+    liveSearch(text, "data-name", event);
   });
 
   mailSearchInput.addEventListener("keyup", event => {
     let text = event.target.value;
-    liveSearch(text, "data-mail");
+    liveSearch(text, "data-mail", event);
   });
 
   locationSearchInput.addEventListener("keyup", event => {
     let text = event.target.value;
-    liveSearch(text, "data-location");
+    liveSearch(text, "data-location", event);
   });
 
   pagination.addEventListener("click", function(e) {
