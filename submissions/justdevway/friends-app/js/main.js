@@ -211,9 +211,9 @@
         const nameA = a.name.first.toUpperCase();
         const nameB = b.name.first.toUpperCase();
         if (index == 2) {
-            return asc(nameA, nameB);
+          return desc(nameA, nameB);
         } else {
-            return desc(nameA, nameB);
+          return asc(nameA, nameB);
         }
     };
 
@@ -224,6 +224,7 @@
       }
       case "date": {
         result = arr.sort(sortByDate);
+        break;
       }
       case "abc": {
         result = arr.sort(sortByLetter);
